@@ -6,17 +6,39 @@ namespace Dino;
 
 use pocketmine\plugin\PluginBase;
 use pocketmine\entity\Skin;
+use pocketmine\event\Listener;
 use pocketmine\utils\TextFormat as C;
 use pocketmine\command\{
 	Command, CommandSender
 };
+use pocketmine\event\player\{
+	PlayerJoinEvent, PlayerQuitEvent, PlayerChangeSkinEvent
+};
 
-class Main extends PluginBase{
+class Main extends PluginBase implements Listener{
+
+	protected $skin = [];
 
 	public function onEnable(): void{
 		foreach(["Dino.png", "Diplo.png", "Robo.png", "geometry.json"] as $file){
 			$this->saveResource($file);
 		}
+		$this->getServer()->getPluginManager()->registerEvents($this, $this);
+	}
+
+	public function onJoin(PlayerJoinEvent $e): void{
+		$player = $e->getPlayer();
+		$this->skin[$player->getName()] = $player->getSkin();
+	}
+
+	public function onQuit(PlayerQuitEvent $e): void{
+		$player = $e->getPlayer();
+		unset($this->skin[$player->getName()]);
+	}
+
+	public function onChangeSkin(PlayerChangeSkinEvent $e): void{
+		$player = $e->getPlayer();
+		$this->skin[$player->getName()] = $player->getSkin();
 	}
 
 	public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args): bool{
@@ -38,6 +60,11 @@ class Main extends PluginBase{
 				case "robo":
 				case "Robo":
 				$this->setSkin($sender, "Robo", ".png", "dino");
+				break;
+				case "reset":
+				$sender->setSkin($this->skin[$sender->getName()]);
+				$sender->sendSkin();
+				$sender->sendMessage(C::GREEN . "You are now yourself");
 				break;
 				default:
 				$sender->sendMessage("Usage: /dino <Dino|Diplo|Robo>");
