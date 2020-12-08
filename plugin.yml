@@ -1,9 +1,9 @@
-name: Dino
+name: TestSkins
 version: 1.0.0
 api: 3.0.0
 main: Dino\Main
-author: xXNiceYT
+author: CrowBaldeYT
 
 commands:
-  dino:
-    description: "Be a 4D Dino"
+  test:
+    description: Test
